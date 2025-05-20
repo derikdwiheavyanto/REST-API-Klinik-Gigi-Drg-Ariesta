@@ -12,6 +12,32 @@ const getPasienSearch = async (req, res, next) => {
     }
 }
 
+const createPasien = async (req, res, next) => {
+    try {
+        const { nama, nik, alamat, no_hp } = req.body;
+
+        // Validasi input
+        if (!nama || !nik || !alamat || !no_hp) {
+            return res.status(400).json({ message: "Semua field harus diisi!" });
+        }
+
+        const result = await pasien_service.createPasien({
+            nama,
+            nik,
+            alamat,
+            no_hp,
+        });
+
+        res.status(201).json({
+            message: "Data pasien berhasil disimpan",
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export default {
-    getPasienSearch
+    getPasienSearch,
+    createPasien
 }
