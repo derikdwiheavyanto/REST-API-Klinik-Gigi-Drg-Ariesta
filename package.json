@@ -1,0 +1,49 @@
+{
+  "name": "klinik_gigi",
+  "version": "1.0.0",
+  "description": "REST-API For Klinik Gigi APPS",
+  "homepage": "https://github.com/derikdwiheavyanto/REST-API-Klinik-Gigi-Drg-Ariesta#readme",
+  "bugs": {
+    "url": "https://github.com/derikdwiheavyanto/REST-API-Klinik-Gigi-Drg-Ariesta/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/derikdwiheavyanto/REST-API-Klinik-Gigi-Drg-Ariesta.git"
+  },
+  "license": "ISC",
+  "author": "Derik Dwi Heavyanto",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "jest -i",
+    "nodemon": "nodemon src/server.js",
+    "seed": "node prisma/seed.js"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.[t|j]sx?$": "babel-jest"
+    }
+  },
+  "dependencies": {
+    "@prisma/client": "^6.8.2",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.27.2",
+    "@types/bcrypt": "^5.0.2",
+    "@types/express": "^5.0.2",
+    "@types/jest": "^29.5.14",
+    "@types/supertest": "^6.0.3",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.8.2",
+    "supertest": "^7.1.1"
+  }
+}
