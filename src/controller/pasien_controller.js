@@ -1,3 +1,5 @@
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client"
+import { ResponseError } from "../error/response_erorr.js"
 import pasien_service from "../service/pasien_service.js"
 
 
@@ -6,7 +8,10 @@ const getPasienSearch = async (req, res, next) => {
         const searchQuery = req.query.search || ''
         const result = await pasien_service.getPasien(searchQuery)
 
-        res.status(200).json({ data: result })
+        res.status(200).json({
+            message: "Get Data Pasien Success",
+            data: result
+        })
     } catch (error) {
         next(error)
     }
@@ -14,19 +19,8 @@ const getPasienSearch = async (req, res, next) => {
 
 const createPasien = async (req, res, next) => {
     try {
-        const { nama, nik, alamat, no_hp } = req.body;
-
-        // Validasi input
-        if (!nama || !nik || !alamat || !no_hp) {
-            return res.status(400).json({ message: "Semua field harus diisi!" });
-        }
-
-        const result = await pasien_service.createPasien({
-            nama,
-            nik,
-            alamat,
-            no_hp,
-        });
+        const request = req.body;
+        const result = await pasien_service.createPasien(request);
 
         res.status(201).json({
             message: "Data pasien berhasil disimpan",
@@ -36,8 +30,39 @@ const createPasien = async (req, res, next) => {
         next(error);
     }
 };
+const updatePasien = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const request = req.body;
+        const result = await pasien_service.updatePasien(id, request);
+
+        res.status(200).json({
+            message: "Data pasien berhasil diupdate",
+            data: result,
+        });
+    } catch (error) {
+
+        next(error);
+    }
+};
+
+const getRiwayatPasien = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const result = await pasien_service.getRiwayatPasien(id)
+
+        res.status(200).json({
+            message: "Get Data Riwayat Success",
+            data: result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
 export default {
     getPasienSearch,
-    createPasien
+    createPasien,
+    getRiwayatPasien,
+    updatePasien,
 }

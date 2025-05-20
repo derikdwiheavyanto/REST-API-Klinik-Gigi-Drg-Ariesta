@@ -7,6 +7,11 @@ export const privateRouter = Router();
 
 privateRouter.use(authMiddleware)
 
+// pasien
 privateRouter.post("/pasien", pasien_controller.createPasien);
-privateRouter.get("/pasien", pasien_controller.getPasienSearch)
+privateRouter.get("/pasien", pasien_controller.getPasienSearch);
+privateRouter.patch("/pasien/:id", pasien_controller.updatePasien);
+
+// kunjungan pasien
+privateRouter.get("/pasien/:id/kunjungan", pasien_controller.getRiwayatPasien)
 privateRouter.delete("/logout", auth_controller.logout)
