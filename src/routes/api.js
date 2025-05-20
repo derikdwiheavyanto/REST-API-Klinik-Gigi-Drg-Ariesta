@@ -11,6 +11,7 @@ privateRouter.use(authMiddleware)
 privateRouter.post("/pasien", pasien_controller.createPasien);
 privateRouter.get("/pasien", pasien_controller.getPasienSearch);
 privateRouter.patch("/pasien/:id", pasien_controller.updatePasien);
+privateRouter.delete("/pasien/:id", pasien_controller.deletePasien);
 
 // kunjungan pasien
 privateRouter.get("/pasien/:id/kunjungan", pasien_controller.getRiwayatPasien)

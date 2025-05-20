@@ -46,6 +46,20 @@ const updatePasien = async (req, res, next) => {
     }
 };
 
+const deletePasien = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id)
+        await pasien_service.deletePasien(id)
+
+        res.status(200).json({
+            message: "Data pasien berhasil dihapus",
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
 const getRiwayatPasien = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id)
@@ -63,6 +77,7 @@ const getRiwayatPasien = async (req, res, next) => {
 export default {
     getPasienSearch,
     createPasien,
-    getRiwayatPasien,
     updatePasien,
+    deletePasien,
+    getRiwayatPasien,
 }

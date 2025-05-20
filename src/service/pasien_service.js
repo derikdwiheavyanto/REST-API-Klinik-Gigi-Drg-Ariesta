@@ -6,15 +6,26 @@ import { ResponseError } from "../error/response_erorr.js";
 
 const getPasien = async (searchQuery) => {
     if (!searchQuery) {
-        return await prismaClient.pasien.findMany();
+        return await prismaClient.pasien.findMany({
+            where: {
+                is_deleted: false
+            },
+        });
     }
 
     const pasien = await prismaClient.pasien.findMany({
         where: {
-            OR: [
-                { nama: { contains: searchQuery } },
-                { nik: { contains: searchQuery } },
-            ],
+            AND: [
+                {
+                    OR: [
+                        { nama: { contains: searchQuery, mode: 'insensitive' } },
+                        { nik: { contains: searchQuery, mode: 'insensitive' } },
+                    ],
+                },
+                {
+                    is_deleted: false
+                }
+            ]
         },
     });
 
@@ -62,7 +73,42 @@ const updatePasien = async (id, request) => {
 
 };
 
+const deletePasien = async (id) => {
+    try {
+        const pasien = await prismaClient.pasien.update({
+            where: {
+                id_pasien: id
+            },
+            data: {
+                is_deleted: true
+            }
+        })
+
+        if (pasien.is_deleted === true) {
+            throw new ResponseError(404, "Id pasien tidak ditemukan");
+        }
+
+        return pasien
+    } catch (error) {
+        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
+            throw new ResponseError(404, "Id pasien tidak ditemukan");
+        }
+
+        throw error
+    }
+}
+
 const getRiwayatPasien = async (id) => {
+
+    const checkIsDeleted = await prismaClient.pasien.findUnique({
+        where: {
+            id_pasien: id
+        }
+    });
+
+    if (checkIsDeleted.is_deleted === true) {
+        throw new ResponseError(404, "Id pasien tidak ditemukan");
+    }
 
     const pasien = await prismaClient.riwayatKunjungan.findMany({
         where: {
@@ -70,12 +116,15 @@ const getRiwayatPasien = async (id) => {
         }
     });
 
+
+
     return pasien
 }
 
 export default {
     createPasien,
     getPasien,
+    updatePasien,
+    deletePasien,
     getRiwayatPasien,
-    updatePasien
 }
