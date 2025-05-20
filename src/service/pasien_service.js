@@ -13,8 +13,7 @@ const getPasien = async (searchQuery) => {
             ],
         },
     });
-
-    return pasien
+    return pasien;
 }
 
 const createPasien = async ({ nama, nik, alamat, no_hp }) => {
@@ -30,7 +29,16 @@ const createPasien = async ({ nama, nik, alamat, no_hp }) => {
     return pasien;
 };
 
+const deletePasien = async (id) => {
+    const deletedPasien = await prismaClient.pasien.delete({
+        where: { id_pasien: Number(id) },
+    });
+
+    return deletedPasien;
+};
+
 export default {
     createPasien,
-    getPasien
+    getPasien,
+    deletePasien
 }

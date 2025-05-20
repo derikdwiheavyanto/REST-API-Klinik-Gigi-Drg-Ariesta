@@ -37,7 +37,28 @@ const createPasien = async (req, res, next) => {
     }
 };
 
+const deletePasien = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({ message: "ID pasien harus disertakan!" });
+        }
+
+        const result = await pasien_service.deletePasien(id);
+
+        if (result) {
+            res.status(200).json({ message: "Data pasien berhasil dihapus" });
+        } else {
+            res.status(404).json({ message: "Data pasien tidak ditemukan" });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
 export default {
     getPasienSearch,
-    createPasien
+    createPasien,
+    deletePasien
 }
