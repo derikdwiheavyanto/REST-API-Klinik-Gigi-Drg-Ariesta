@@ -16,6 +16,19 @@ const getPasienSearch = async (req, res, next) => {
         next(error)
     }
 }
+const getPasienById = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const result = await pasien_service.getPasienById(id)
+
+        res.status(200).json({
+            message: "Get Data Pasien Success",
+            data: result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
 const createPasien = async (req, res, next) => {
     try {
@@ -77,7 +90,7 @@ const getRiwayatPasien = async (req, res, next) => {
 const createRiwayat = async (req, res, next) => {
     try {
         const id_pasien = parseInt(req.params.id, 10);
-        const { anamnesa, diagnosa, terapi, catatan,} = req.body;
+        const { anamnesa, diagnosa, terapi, catatan, } = req.body;
         const imagePath = req.file ? req.file.path : null;
 
         // Validasi input
@@ -106,6 +119,7 @@ const createRiwayat = async (req, res, next) => {
 
 export default {
     getPasienSearch,
+    getPasienById,
     createPasien,
     updatePasien,
     deletePasien,

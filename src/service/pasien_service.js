@@ -31,6 +31,33 @@ const getPasien = async (searchQuery) => {
 
     return pasien
 }
+const getPasienById = async (id) => {
+    const checkIsDeleted = await prismaClient.pasien.findUnique({
+        where: {
+            id_pasien: id
+        }
+    });
+
+    if (checkIsDeleted.is_deleted === true) {
+        throw new ResponseError(404, "Id pasien tidak ditemukan");
+    }
+
+
+    const pasien = await prismaClient.pasien.findFirst({
+        where: {
+            AND: [
+                {
+                    id_pasien: id
+                },
+                {
+                    is_deleted: false
+                }
+            ]
+        },
+    });
+
+    return pasien
+}
 
 const createPasien = async (request) => {
     const inputPasien = validate(inputPasienValidation, request)
@@ -154,6 +181,7 @@ const createRiwayat = async (id_pasien,{ anamnesa, diagnosa, terapi, catatan, im
 export default {
     createPasien,
     getPasien,
+    getPasienById,
     updatePasien,
     deletePasien,
 
