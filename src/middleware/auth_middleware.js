@@ -6,7 +6,7 @@ export const authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        throw new ResponseError(401, 'oke');
+        throw new ResponseError(401, 'Unauthorized');
     }
 
     const token = authHeader.split(' ')[1]
