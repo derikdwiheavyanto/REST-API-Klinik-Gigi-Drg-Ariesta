@@ -7,6 +7,8 @@ const main = async () => {
     // Optional: hapus data sebelumnya
     await prisma.user.deleteMany();
     await prisma.pasien.deleteMany();
+    await prisma.riwayatKunjungan.deleteMany();
+    await prisma.$executeRawUnsafe(`ALTER TABLE pasiens AUTO_INCREMENT = 1`);
 
     // Tambah user admin dengan hash password
     await prisma.user.create({
@@ -56,6 +58,63 @@ const main = async () => {
             },
         ],
     });
+
+    await prisma.riwayatKunjungan.createMany({
+        data: [
+            {
+                id_pasien: 1,
+                anamnesa: 'Sakit kepala hebat',
+                diagnosa: 'Migrain',
+                terapi: 'Paracetamol',
+                catatan: 'Istirahat cukup',
+                image: 'gambar1.jpg',
+                created_at: new Date('2023-01-01'),
+                updated_at: new Date('2023-01-01'),
+            },
+            {
+                id_pasien: 1,
+                anamnesa: 'Demam dan flu',
+                diagnosa: 'Influenza',
+                terapi: 'Antihistamin',
+                catatan: 'Minum air hangat',
+                image: 'gambar2.jpg',
+                created_at: new Date('2023-02-10'),
+                updated_at: new Date('2023-02-10'),
+            },
+            {
+                id_pasien: 1,
+                anamnesa: 'Batuk kering',
+                diagnosa: 'Bronkitis ringan',
+                terapi: 'Obat batuk',
+                catatan: 'Jangan minum es',
+                image: 'gambar3.jpg',
+                created_at: new Date('2023-03-15'),
+                updated_at: new Date('2023-03-15'),
+            },
+
+            // Data untuk pasien ID 2
+            {
+                id_pasien: 2,
+                anamnesa: 'Sakit gigi berdenyut',
+                diagnosa: 'Infeksi akar',
+                terapi: 'Antibiotik & tambal',
+                catatan: 'Kontrol seminggu',
+                image: 'gigi1.jpg',
+                created_at: new Date('2023-04-01'),
+                updated_at: new Date('2023-04-01'),
+            },
+            {
+                id_pasien: 2,
+                anamnesa: 'Gusi bengkak',
+                diagnosa: 'Gingivitis',
+                terapi: 'Pembersihan karang gigi',
+                catatan: 'Sikat gigi rutin',
+                image: 'gigi2.jpg',
+                created_at: new Date('2023-04-20'),
+                updated_at: new Date('2023-04-20'),
+            },
+        ]
+    })
 
     console.log('✅ Seeding user & pasien selesai!');
 };
