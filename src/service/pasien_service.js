@@ -75,6 +75,17 @@ const updatePasien = async (id, request) => {
 
 const deletePasien = async (id) => {
     try {
+
+        const checkIsDeleted = await prismaClient.pasien.findUnique({
+            where: {
+                id_pasien: id
+            }
+        });
+
+        if (checkIsDeleted.is_deleted === true) {
+            throw new ResponseError(404, "Id pasien tidak ditemukan");
+        }
+
         const pasien = await prismaClient.pasien.update({
             where: {
                 id_pasien: id
