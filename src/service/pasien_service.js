@@ -95,10 +95,6 @@ const deletePasien = async (id) => {
             }
         })
 
-        if (pasien.is_deleted === true) {
-            throw new ResponseError(404, "Id pasien tidak ditemukan");
-        }
-
         return pasien
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
