@@ -77,11 +77,12 @@ const getRiwayatPasien = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id)
         const result = await pasien_service.getRiwayatPasien(id)
-
-        res.status(200).json({
-            message: "Get Data Riwayat Success",
-            data: result
-        })
+        const baseUrl = process.env.BASE_URL
+        result.image = `${baseUrl}/${result.image}`
+            res.status(200).json({
+                message: "Get Data Riwayat Success",
+                data: result
+            })
     } catch (error) {
         next(error)
     }
