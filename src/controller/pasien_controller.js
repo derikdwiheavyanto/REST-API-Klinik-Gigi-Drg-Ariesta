@@ -30,6 +30,7 @@ const createPasien = async (req, res, next) => {
         next(error);
     }
 };
+
 const updatePasien = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id)
@@ -59,7 +60,6 @@ const deletePasien = async (req, res, next) => {
     }
 }
 
-
 const getRiwayatPasien = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id)
@@ -74,10 +74,42 @@ const getRiwayatPasien = async (req, res, next) => {
     }
 }
 
+const createRiwayat = async (req, res, next) => {
+    try {
+        const id_pasien = parseInt(req.params.id, 10);
+        const { anamnesa, diagnosa, terapi, catatan,} = req.body;
+        const imagePath = req.file ? req.file.path : null;
+
+        // Validasi input
+        if (!anamnesa || !diagnosa || !terapi) {
+            return res.status(400).json({
+                message: "Anamnesa, diagnosa, dan terapi harus diisi!",
+            });
+        }
+
+        const result = await pasien_service.createRiwayat(id_pasien, {
+            anamnesa,
+            diagnosa,
+            terapi,
+            catatan,
+            image: imagePath,
+        });
+
+        res.status(201).json({
+            message: "Riwayat kunjungan berhasil ditambahkan",
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export default {
     getPasienSearch,
     createPasien,
     updatePasien,
     deletePasien,
+
     getRiwayatPasien,
+    createRiwayat
 }

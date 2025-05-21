@@ -3,6 +3,7 @@ import { authMiddleware } from "../middleware/auth_middleware.js";
 import auth_controller from "../controller/auth_controller.js";
 import pasien_controller from "../controller/pasien_controller.js";
 import dashboard_controller from "../controller/dashboard_controller.js";
+import upload from "../middleware/file_upload.js"; 
 
 export const privateRouter = Router();
 
@@ -19,5 +20,6 @@ privateRouter.patch("/pasien/:id", pasien_controller.updatePasien);
 privateRouter.delete("/pasien/:id", pasien_controller.deletePasien);
 
 // kunjungan pasien
-privateRouter.get("/pasien/:id/kunjungan", pasien_controller.getRiwayatPasien)
+privateRouter.get("/pasien/:id/kunjungan", pasien_controller.getRiwayatPasien);
+privateRouter.post("/pasien/:id/kunjungan", upload.single("image"),pasien_controller.createRiwayat);
 privateRouter.delete("/logout", auth_controller.logout)

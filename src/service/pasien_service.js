@@ -123,15 +123,40 @@ const getRiwayatPasien = async (id) => {
         }
     });
 
-
-
     return pasien
 }
+
+const createRiwayat = async (id_pasien,{ anamnesa, diagnosa, terapi, catatan, image }) => {
+    const pasien = await prismaClient.pasien.findUnique({
+        where: { 
+            id_pasien
+        }, 
+    });
+
+    if (!pasien || pasien.is_deleted) {
+        throw new Error("Pasien tidak ditemukan atau telah dihapus");
+    }
+
+    const riwayat = await prismaClient.riwayatKunjungan.create({
+        data: {
+            id_pasien: id_pasien,
+            anamnesa: anamnesa,
+            diagnosa: diagnosa,
+            terapi: terapi,
+            catatan: catatan,
+            image: image,
+        },
+    });
+
+    return riwayat;
+};
 
 export default {
     createPasien,
     getPasien,
     updatePasien,
     deletePasien,
+
     getRiwayatPasien,
+    createRiwayat
 }
