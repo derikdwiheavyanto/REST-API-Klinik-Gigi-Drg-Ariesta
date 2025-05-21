@@ -2,10 +2,15 @@ import { Router } from "express";
 import { authMiddleware } from "../middleware/auth_middleware.js";
 import auth_controller from "../controller/auth_controller.js";
 import pasien_controller from "../controller/pasien_controller.js";
+import dashboard_controller from "../controller/dashboard_controller.js";
 
 export const privateRouter = Router();
 
 privateRouter.use(authMiddleware)
+
+
+// dashboard
+privateRouter.get("/dashboard", dashboard_controller.getDashboard);
 
 // pasien
 privateRouter.post("/pasien", pasien_controller.createPasien);
