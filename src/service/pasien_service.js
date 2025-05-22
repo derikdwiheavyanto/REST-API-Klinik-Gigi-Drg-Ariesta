@@ -14,8 +14,8 @@ const getPasien = async (searchQuery, skip, limit) => {
             AND: [
                 {
                     OR: [
-                        { nama: { contains: searchQuery, mode: 'insensitive' } },
-                        { nik: { contains: searchQuery, mode: 'insensitive' } },
+                        { nama: { contains: searchQuery, } },
+                        { nik: { contains: searchQuery, } },
                     ],
                 },
                 {

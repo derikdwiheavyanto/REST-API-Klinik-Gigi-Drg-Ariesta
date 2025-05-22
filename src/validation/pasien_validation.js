@@ -13,10 +13,10 @@ const inputPasienValidation = Joi.object({
         "any.required": "Nama harus diisi",
         "string.max": "Nama tidak boleh lebih dari 100 karakter",
     }),
-    alamat: Joi.string().max(100).optional().messages({
+    alamat: Joi.string().max(100).allow('').optional().messages({
         "string.max": "Alamat tidak boleh lebih dari 100 karakter",
     }),
-    no_hp: Joi.string().max(20).optional().messages({
+    no_hp: Joi.string().max(20).allow('').optional().messages({
         "string.max": "No HP tidak boleh lebih dari 20 karakter",
     }),
 });
