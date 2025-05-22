@@ -13,9 +13,9 @@ web.use(express.json());
 web.use(express.urlencoded({ extended: true }));
 
 
+web.use("/uploads", express.static("uploads"));
 web.use(publicRouter)
 web.use(privateRouter)
 
-web.use("/uploads", express.static("uploads"));
 
 web.use(errorMiddleware)
