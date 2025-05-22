@@ -14,6 +14,7 @@ web.use(express.urlencoded({ extended: true }));
 
 
 web.use("/uploads", express.static("uploads"));
+
 web.use(publicRouter)
 web.use(privateRouter)
 

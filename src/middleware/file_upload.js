@@ -8,7 +8,7 @@ const storage = multer.diskStorage({
         cb(null, 'uploads/'); // Folder untuk menyimpan file
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname); // Nama file unik
+        cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g, "_")); // Nama file unik
     },
 });
 
