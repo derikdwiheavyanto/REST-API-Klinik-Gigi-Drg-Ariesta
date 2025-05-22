@@ -1,12 +1,15 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client"
-import { ResponseError } from "../error/response_erorr.js"
+
 import pasien_service from "../service/pasien_service.js"
 
 
 const getPasienSearch = async (req, res, next) => {
     try {
         const searchQuery = req.query.search || ''
-        const result = await pasien_service.getPasien(searchQuery)
+        const page = parseInt(req.query.page) || 1;       // halaman ke-berapa
+        const limit = parseInt(req.query.limit) || 10;    // berapa data per halaman
+        const skip = (page - 1) * limit;
+
+        const result = await pasien_service.getPasien(searchQuery, skip, limit)
 
         res.status(200).json({
             message: "Get Data Pasien Success",

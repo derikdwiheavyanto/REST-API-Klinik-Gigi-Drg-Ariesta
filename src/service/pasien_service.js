@@ -4,17 +4,13 @@ import { inputPasienValidation } from "../validation/pasien_validation.js"
 import { validate } from "../validation/validation.js";
 import { ResponseError } from "../error/response_erorr.js";
 
-const getPasien = async (searchQuery) => {
-    if (!searchQuery) {
-        return await prismaClient.pasien.findMany({
-            where: {
-                is_deleted: false
-            },
-        });
-    }
+const getPasien = async (searchQuery, skip, limit) => {
+    let whereClause = {
+        is_deleted: false
+    };
 
-    const pasien = await prismaClient.pasien.findMany({
-        where: {
+    if (searchQuery) {
+        whereClause = {
             AND: [
                 {
                     OR: [
@@ -26,11 +22,30 @@ const getPasien = async (searchQuery) => {
                     is_deleted: false
                 }
             ]
-        },
+        };
+    }
+
+    // Hitung total data yang cocok
+    const totalData = await prismaClient.pasien.count({
+        where: whereClause
     });
 
-    return pasien
-}
+    // Ambil data sesuai pagination
+    const pasien = await prismaClient.pasien.findMany({
+        where: whereClause,
+        skip: skip,
+        take: limit
+    });
+
+    // Hitung total halaman
+    const totalPage = Math.ceil(totalData / limit);
+
+    return {
+        data: pasien,
+        totalData,
+        totalPage
+    };
+};
 const getPasienById = async (id) => {
     const checkIsDeleted = await prismaClient.pasien.findUnique({
         where: {
@@ -140,7 +155,7 @@ const getRiwayatPasien = async (id) => {
         }
     });
 
-    if (checkIsDeleted.is_deleted === true) {
+    if (checkIsDeleted.is_deleted === true || checkIsDeleted === null) {
         throw new ResponseError(404, "Id pasien tidak ditemukan");
     }
 
