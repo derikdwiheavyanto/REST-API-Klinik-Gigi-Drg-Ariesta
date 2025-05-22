@@ -13,7 +13,9 @@ const getPasienSearch = async (req, res, next) => {
 
         res.status(200).json({
             message: "Get Data Pasien Success",
-            data: result
+            data: result.data,
+            total_data: result.totalData,
+            total_page: result.totalPage
         })
     } catch (error) {
         next(error)
