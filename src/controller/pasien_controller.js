@@ -120,13 +120,27 @@ const createRiwayat = async (req, res, next) => {
     }
 };
 
+const deleteRiwayatPasien = async (req, res, next) => {
+    try {
+        const id_pasien = parseInt(req.params.id)
+        const id_kunjungan = parseInt(req.params.id_kunjungan)
+        await pasien_service.deleteRiwayatPasien(id_pasien, id_kunjungan)
+
+        res.status(200).json({
+            message: "Data kunjungan berhasil dihapus",
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 export default {
     getPasienSearch,
     getPasienById,
     createPasien,
     updatePasien,
+    deleteRiwayatPasien,
     deletePasien,
-
     getRiwayatPasien,
     createRiwayat
 }

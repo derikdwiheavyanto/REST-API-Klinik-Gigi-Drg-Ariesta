@@ -153,11 +153,11 @@ const getRiwayatPasien = async (id) => {
     return pasien
 }
 
-const createRiwayat = async (id_pasien,{ anamnesa, diagnosa, terapi, catatan, image }) => {
+const createRiwayat = async (id_pasien, { anamnesa, diagnosa, terapi, catatan, image }) => {
     const pasien = await prismaClient.pasien.findUnique({
-        where: { 
+        where: {
             id_pasien
-        }, 
+        },
     });
 
     if (!pasien || pasien.is_deleted) {
@@ -178,13 +178,53 @@ const createRiwayat = async (id_pasien,{ anamnesa, diagnosa, terapi, catatan, im
     return riwayat;
 };
 
+
+const deleteRiwayatPasien = async (id_pasien, id_kunjungan) => {
+    try {
+
+        const checkIsDeleted = await prismaClient.riwayatKunjungan.count({
+            where: {
+                AND: [
+                    {
+                        id_kunjungan: id_kunjungan
+                    },
+                    {
+                        id_pasien: id_pasien
+                    }
+                ]
+
+            }
+        });
+
+        if (checkIsDeleted === 0) {
+            throw new ResponseError(404, "Riwayat tidak ditemukan");
+        }
+
+        const riwayatKunjungan = await prismaClient.riwayatKunjungan.delete({
+            where: {
+                id_kunjungan: id_kunjungan,
+                id_pasien: id_pasien
+            },
+        })
+
+        return riwayatKunjungan
+    } catch (error) {
+        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
+            throw new ResponseError(404, "Id pasien tidak ditemukan");
+        }
+
+        throw error
+    }
+}
+
+
 export default {
     createPasien,
     getPasien,
     getPasienById,
     updatePasien,
     deletePasien,
-
+    deleteRiwayatPasien,
     getRiwayatPasien,
     createRiwayat
 }
