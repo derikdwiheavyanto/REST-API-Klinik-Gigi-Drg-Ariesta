@@ -78,11 +78,13 @@ const getRiwayatPasien = async (req, res, next) => {
         const id = parseInt(req.params.id)
         const result = await pasien_service.getRiwayatPasien(id)
         const baseUrl = process.env.BASE_URL
-        result.image = `${baseUrl}/${result.image}`
-            res.status(200).json({
-                message: "Get Data Riwayat Success",
-                data: result
-            })
+        result.forEach(riwayat => {
+            riwayat.image = `${baseUrl}/${riwayat.image}`
+        });
+        res.status(200).json({
+            message: "Get Data Riwayat Success",
+            data: result
+        })
     } catch (error) {
         next(error)
     }
