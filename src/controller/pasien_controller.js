@@ -125,6 +125,28 @@ const createRiwayat = async (req, res, next) => {
     }
 };
 
+const updateRiwayatPasien = async (req, res, next) => {
+    try {
+        const id_pasien = parseInt(req.params.id)
+        const id_kunjungan = parseInt(req.params.id_kunjungan)
+        const request = req.body
+        const imagePath = req.file ? req.file.path : null
+
+        const result = await pasien_service.updateRiwayatPasien({
+            id_pasien,
+            id_kunjungan,
+            imagePath
+        }, request)
+
+        res.status(200).json({
+            message: "Riwayat kunjungan berhasil diupdate",
+            data: result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 const deleteRiwayatPasien = async (req, res, next) => {
     try {
         const id_pasien = parseInt(req.params.id)
@@ -144,8 +166,9 @@ export default {
     getPasienById,
     createPasien,
     updatePasien,
-    deleteRiwayatPasien,
     deletePasien,
     getRiwayatPasien,
-    createRiwayat
+    createRiwayat,
+    updateRiwayatPasien,
+    deleteRiwayatPasien,
 }

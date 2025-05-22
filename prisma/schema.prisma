@@ -40,8 +40,8 @@ model RiwayatKunjungan {
   anamnesa     String
   diagnosa     String
   terapi       String
-  catatan      String
-  image        String
+  catatan      String?
+  image        String?
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
   id_pasien    Int

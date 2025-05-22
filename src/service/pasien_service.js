@@ -3,6 +3,7 @@ import { prismaClient } from "../application/database.js"
 import { inputPasienValidation } from "../validation/pasien_validation.js"
 import { validate } from "../validation/validation.js";
 import { ResponseError } from "../error/response_erorr.js";
+import { inputRiwayatValidation } from "../validation/riwayat_validation.js";
 
 const getPasien = async (searchQuery, skip, limit) => {
     let whereClause = {
@@ -53,8 +54,8 @@ const getPasienById = async (id) => {
         }
     });
 
-    if (checkIsDeleted.is_deleted === true) {
-        throw new ResponseError(404, "Id pasien tidak ditemukan");
+    if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+        throw new ResponseError(404, "data pasien tidak ditemukan");
     }
 
 
@@ -90,6 +91,17 @@ const createPasien = async (request) => {
 const updatePasien = async (id, request) => {
     try {
         const inputPasien = validate(inputPasienValidation, request)
+
+        const checkIsDeleted = await prismaClient.pasien.findUnique({
+            where: {
+                id_pasien: id
+            }
+        });
+
+        if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+            throw new ResponseError(404, "data pasien tidak ditemukan");
+        }
+
         const pasien = await prismaClient.pasien.update({
             where: {
                 id_pasien: id
@@ -105,7 +117,7 @@ const updatePasien = async (id, request) => {
         return pasien;
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            throw new ResponseError(404, "Id pasien tidak ditemukan");
+            throw new ResponseError(404, "data pasien tidak ditemukan");
 
         }
 
@@ -124,8 +136,8 @@ const deletePasien = async (id) => {
             }
         });
 
-        if (checkIsDeleted.is_deleted === true) {
-            throw new ResponseError(404, "Id pasien tidak ditemukan");
+        if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+            throw new ResponseError(404, "data pasien tidak ditemukan");
         }
 
         const pasien = await prismaClient.pasien.update({
@@ -140,7 +152,7 @@ const deletePasien = async (id) => {
         return pasien
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            throw new ResponseError(404, "Id pasien tidak ditemukan");
+            throw new ResponseError(404, "data pasien tidak ditemukan");
         }
 
         throw error
@@ -155,8 +167,8 @@ const getRiwayatPasien = async (id) => {
         }
     });
 
-    if (checkIsDeleted.is_deleted === true || checkIsDeleted === null) {
-        throw new ResponseError(404, "Id pasien tidak ditemukan");
+    if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+        throw new ResponseError(404, "data pasien tidak ditemukan");
     }
 
     const pasien = await prismaClient.riwayatKunjungan.findMany({
@@ -193,6 +205,35 @@ const createRiwayat = async (id_pasien, { anamnesa, diagnosa, terapi, catatan, i
     return riwayat;
 };
 
+const updateRiwayatPasien = async ({ id_pasien, id_kunjungan, imagePath }, request) => {
+    const inputRiwayat = validate(inputRiwayatValidation, request)
+    const checkIsDeleted = await prismaClient.pasien.findUnique({
+        where: {
+            id_pasien: id_pasien
+
+        }
+    })
+
+    if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+        throw new ResponseError(404, "data pasien tidak ditemukan");
+    }
+
+    const riwayatKunjungan = await prismaClient.riwayatKunjungan.update({
+        where: {
+            id_kunjungan: id_kunjungan,
+            id_pasien: id_pasien
+        },
+        data: {
+            anamnesa: inputRiwayat.anamnesa,
+            diagnosa: inputRiwayat.diagnosa,
+            terapi: inputRiwayat.terapi,
+            catatan: inputRiwayat.catatan,
+            image: imagePath
+        }
+    })
+
+    return riwayatKunjungan
+}
 
 const deleteRiwayatPasien = async (id_pasien, id_kunjungan) => {
     try {
@@ -225,7 +266,7 @@ const deleteRiwayatPasien = async (id_pasien, id_kunjungan) => {
         return riwayatKunjungan
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            throw new ResponseError(404, "Id pasien tidak ditemukan");
+            throw new ResponseError(404, "data pasien tidak ditemukan");
         }
 
         throw error
@@ -239,7 +280,8 @@ export default {
     getPasienById,
     updatePasien,
     deletePasien,
-    deleteRiwayatPasien,
+    createRiwayat,
     getRiwayatPasien,
-    createRiwayat
+    updateRiwayatPasien,
+    deleteRiwayatPasien,
 }
