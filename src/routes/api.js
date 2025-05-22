@@ -22,4 +22,5 @@ privateRouter.delete("/pasien/:id", pasien_controller.deletePasien);
 // kunjungan pasien
 privateRouter.get("/pasien/:id/kunjungan", pasien_controller.getRiwayatPasien);
 privateRouter.post("/pasien/:id/kunjungan", upload.single("image"),pasien_controller.createRiwayat);
+privateRouter.patch("/pasien/kunjungan/id", upload.single("image"),pasien_controller.updateRiwayat);
 privateRouter.delete("/logout", auth_controller.logout)

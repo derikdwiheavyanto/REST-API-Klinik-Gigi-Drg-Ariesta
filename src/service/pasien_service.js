@@ -126,11 +126,11 @@ const getRiwayatPasien = async (id) => {
     return pasien
 }
 
-const createRiwayat = async (id_pasien,{ anamnesa, diagnosa, terapi, catatan, image }) => {
+const createRiwayat = async (id_pasien, { anamnesa, diagnosa, terapi, catatan, image }) => {
     const pasien = await prismaClient.pasien.findUnique({
-        where: { 
+        where: {
             id_pasien
-        }, 
+        },
     });
 
     if (!pasien || pasien.is_deleted) {
@@ -151,6 +151,39 @@ const createRiwayat = async (id_pasien,{ anamnesa, diagnosa, terapi, catatan, im
     return riwayat;
 };
 
+const updateRiwayat = async (id_riwayat, { anamnesa, diagnosa, terapi, catatan, image }) => {
+    try {
+        const riwayat = await prismaClient.riwayatKunjungan.findUnique({
+            where: {
+                id_riwayat
+            },
+        });
+
+        if (!riwayat) {
+            throw new ResponseError(404, "Data riwayat tidak ditemukan");
+        }
+
+        const updatedRiwayat = await prismaClient.riwayatKunjungan.update({
+            where: { id_riwayat },
+            data: {
+                anamnesa,
+                diagnosa,
+                terapi,
+                catatan,
+                image: image || riwayat.image, // Gunakan gambar lama jika tidak ada gambar baru
+            },
+        });
+
+        return updatedRiwayat;
+    } catch (error) {
+        if (error instanceof PrismaClientKnownRequestError && error.code === "P2025") {
+            throw new ResponseError(404, "Data riwayat tidak ditemukan");
+        }
+        throw error;
+    }
+};
+
+
 export default {
     createPasien,
     getPasien,
@@ -158,5 +191,6 @@ export default {
     deletePasien,
 
     getRiwayatPasien,
-    createRiwayat
+    createRiwayat,
+    updateRiwayat
 }
