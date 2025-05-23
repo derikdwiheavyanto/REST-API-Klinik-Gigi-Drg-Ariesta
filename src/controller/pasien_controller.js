@@ -106,7 +106,8 @@ const createRiwayat = async (req, res, next) => {
 
 const updateRiwayat = async (req, res, next) => {
     try {
-        const id_riwayat = parseInt(req.params.id, 10);
+        const id_pasien = parseInt(req.params.id, 10);
+        const id_kunjungan = parseInt(req.params.id, 10);
         const { anamnesa, diagnosa, terapi, catatan } = req.body;
         const imagePath = req.file ? req.file.path : null;
 
@@ -117,7 +118,7 @@ const updateRiwayat = async (req, res, next) => {
             });
         }
 
-        const result = await pasien_service.updateRiwayat(id_riwayat, {
+        const result = await pasien_service.updateRiwayat(id_pasien, id_kunjungan, {
             anamnesa,
             diagnosa,
             terapi,

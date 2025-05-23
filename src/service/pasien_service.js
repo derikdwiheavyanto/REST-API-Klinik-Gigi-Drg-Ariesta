@@ -151,11 +151,12 @@ const createRiwayat = async (id_pasien, { anamnesa, diagnosa, terapi, catatan, i
     return riwayat;
 };
 
-const updateRiwayat = async (id_riwayat, { anamnesa, diagnosa, terapi, catatan, image }) => {
+const updateRiwayat = async (id_pasien, id_kunjungan, { anamnesa, diagnosa, terapi, catatan, image }) => {
     try {
-        const riwayat = await prismaClient.riwayatKunjungan.findUnique({
+        const riwayat = await prismaClient.riwayatKunjungan.findFirst({
             where: {
-                id_riwayat
+                id_pasien: id_pasien,
+                id_kunjungan:  id_kunjungan
             },
         });
 
@@ -164,12 +165,12 @@ const updateRiwayat = async (id_riwayat, { anamnesa, diagnosa, terapi, catatan, 
         }
 
         const updatedRiwayat = await prismaClient.riwayatKunjungan.update({
-            where: { id_riwayat },
+            where: { id_kunjungan: id_kunjungan},
             data: {
-                anamnesa,
-                diagnosa,
-                terapi,
-                catatan,
+                anamnesa: anamnesa || riwayat.anamnesa,
+                diagnosa: diagnosa || riwayat.diagnosa,
+                terapi: terapi || riwayat.terapi,
+                catatan: catatan || riwayat.catatan,
                 image: image || riwayat.image, // Gunakan gambar lama jika tidak ada gambar baru
             },
         });
