@@ -106,6 +106,24 @@ const getRiwayatPasien = async (req, res, next) => {
     }
 }
 
+const getRiwayatById = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const result = await pasien_service.getRiwayatById(id)
+        const baseUrl = process.env.BASE_URL
+        result.image = `${baseUrl}/${result.image}`
+        res.status(200).json({
+            message: "Get Data Riwayat Success",
+            data: result
+        })
+    } catch (error) {
+        if (error.code === 'P2025') {
+            throw new ResponseError(404, "data riwayat tidak ditemukan");
+        }
+        next(error)
+    }
+}
+
 const createRiwayat = async (req, res, next) => {
     try {
         const id_pasien = parseInt(req.params.id, 10);
@@ -187,6 +205,7 @@ export default {
     updatePasien,
     deletePasien,
     getRiwayatPasien,
+    getRiwayatById,
     createRiwayat,
     updateRiwayatPasien,
     deleteRiwayatPasien,

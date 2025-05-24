@@ -1,4 +1,3 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library.js";
 import { prismaClient } from "../application/database.js"
 import { inputPasienValidation } from "../validation/pasien_validation.js"
 import { validate } from "../validation/validation.js";
@@ -188,6 +187,27 @@ const getRiwayatPasien = async (id) => {
     return pasien
 }
 
+const getRiwayatById = async (id) => {
+
+    const checkIsDeleted = await prismaClient.pasien.findUnique({
+        where: {
+            id_pasien: id
+        }
+    });
+
+    if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+        throw new ResponseError(404, "data pasien tidak ditemukan");
+    }
+
+    const riwayat = await prismaClient.riwayatKunjungan.findUnique({
+        where: {
+            id_kunjungan: id
+        }
+    });
+
+    return riwayat
+}
+
 const createRiwayat = async (id_pasien, { anamnesa, diagnosa, terapi, catatan, image }) => {
     const pasien = await prismaClient.pasien.findUnique({
         where: {
@@ -196,7 +216,7 @@ const createRiwayat = async (id_pasien, { anamnesa, diagnosa, terapi, catatan, i
     });
 
     if (!pasien || pasien.is_deleted) {
-        throw new Error("Pasien tidak ditemukan atau telah dihapus");
+        throw new ResponseError(404, "Pasien tidak ditemukan atau telah dihapus");
     }
 
     const riwayat = await prismaClient.riwayatKunjungan.create({
@@ -282,6 +302,7 @@ export default {
     deletePasien,
     createRiwayat,
     getRiwayatPasien,
+    getRiwayatById,
     updateRiwayatPasien,
     deleteRiwayatPasien,
 }
