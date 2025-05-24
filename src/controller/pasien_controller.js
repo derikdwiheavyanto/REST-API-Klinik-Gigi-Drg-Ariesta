@@ -109,7 +109,8 @@ const getRiwayatPasien = async (req, res, next) => {
 const getRiwayatById = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id)
-        const result = await pasien_service.getRiwayatById(id)
+        const id_kunjungan = parseInt(req.params.id_kunjungan)
+        const result = await pasien_service.getRiwayatById(id, id_kunjungan)
         const baseUrl = process.env.BASE_URL
         result.image = `${baseUrl}/${result.image}`
         res.status(200).json({

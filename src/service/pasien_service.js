@@ -187,7 +187,7 @@ const getRiwayatPasien = async (id) => {
     return pasien
 }
 
-const getRiwayatById = async (id) => {
+const getRiwayatById = async (id, id_kunjungan) => {
 
     const checkIsDeleted = await prismaClient.pasien.findUnique({
         where: {
@@ -201,7 +201,7 @@ const getRiwayatById = async (id) => {
 
     const riwayat = await prismaClient.riwayatKunjungan.findUnique({
         where: {
-            id_kunjungan: id
+            id_kunjungan: id_kunjungan
         }
     });
 
