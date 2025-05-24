@@ -13,7 +13,7 @@ export const errorMiddleware = (err, req, res, next) => {
         });
     } else {
         res.status(500).json({
-            message: err.message
+            message: "Mohon maaf terjadi kesalahan, silahkan coba lagi"
         });
     }
 

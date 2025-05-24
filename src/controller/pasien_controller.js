@@ -1,4 +1,5 @@
 
+import { ResponseError } from "../error/response_erorr.js";
 import pasien_service from "../service/pasien_service.js"
 
 
@@ -45,6 +46,9 @@ const createPasien = async (req, res, next) => {
             data: result,
         });
     } catch (error) {
+        if (error.code === "P2002" && error.meta.target.includes("nik")) {
+            throw new ResponseError(400, "NIK sudah terdaftar");
+        }
         next(error);
     }
 };
@@ -60,7 +64,10 @@ const updatePasien = async (req, res, next) => {
             data: result,
         });
     } catch (error) {
+        if (error.code === 'P2025') {
+            throw new ResponseError(404, "data pasien tidak ditemukan");
 
+        }
         next(error);
     }
 };
@@ -74,6 +81,10 @@ const deletePasien = async (req, res, next) => {
             message: "Data pasien berhasil dihapus",
         })
     } catch (error) {
+        if (error.code === 'P2025') {
+            throw new ResponseError(404, "data pasien tidak ditemukan");
+
+        }
         next(error)
     }
 }
@@ -143,6 +154,10 @@ const updateRiwayatPasien = async (req, res, next) => {
             data: result
         })
     } catch (error) {
+        if (error.code === 'P2025') {
+            throw new ResponseError(404, "data riwayat tidak ditemukan");
+
+        }
         next(error)
     }
 }
@@ -157,6 +172,10 @@ const deleteRiwayatPasien = async (req, res, next) => {
             message: "Data kunjungan berhasil dihapus",
         })
     } catch (error) {
+        if (error.code === 'P2025') {
+            throw new ResponseError(404, "data pasien tidak ditemukan");
+
+        }
         next(error)
     }
 }

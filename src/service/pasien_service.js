@@ -77,7 +77,31 @@ const getPasienById = async (id) => {
 
 const createPasien = async (request) => {
     const inputPasien = validate(inputPasienValidation, request)
-    const pasien = await prismaClient.pasien.create({
+    let pasien;
+    const chekcPasienIsExistDeleted = await prismaClient.pasien.findFirst({
+        where: {
+            nik: inputPasien.nik,
+            is_deleted: true
+        }
+    })
+
+    if (chekcPasienIsExistDeleted) {
+        pasien = await prismaClient.pasien.update({
+            where: {
+                nik: inputPasien.nik
+            },
+            data: {
+                nama: inputPasien.nama,
+                alamat: inputPasien.alamat,
+                no_hp: inputPasien.no_hp,
+                is_deleted: false
+            }
+        })
+
+        return pasien
+    }
+
+    pasien = await prismaClient.pasien.create({
         data: {
             nama: inputPasien.nama,
             nik: inputPasien.nik,
@@ -89,74 +113,58 @@ const createPasien = async (request) => {
     return pasien;
 };
 const updatePasien = async (id, request) => {
-    try {
-        const inputPasien = validate(inputPasienValidation, request)
+    const inputPasien = validate(inputPasienValidation, request)
 
-        const checkIsDeleted = await prismaClient.pasien.findUnique({
-            where: {
-                id_pasien: id
-            }
-        });
-
-        if (!checkIsDeleted || checkIsDeleted.is_deleted) {
-            throw new ResponseError(404, "data pasien tidak ditemukan");
+    const checkIsDeleted = await prismaClient.pasien.findUnique({
+        where: {
+            id_pasien: id
         }
+    });
 
-        const pasien = await prismaClient.pasien.update({
-            where: {
-                id_pasien: id
-            },
-            data: {
-                nama: inputPasien.nama,
-                nik: inputPasien.nik,
-                alamat: inputPasien.alamat,
-                no_hp: inputPasien.no_hp
-            },
-        });
-
-        return pasien;
-    } catch (error) {
-        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            throw new ResponseError(404, "data pasien tidak ditemukan");
-
-        }
-
-        throw error
+    if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+        throw new ResponseError(404, "data pasien tidak ditemukan");
     }
+
+    const pasien = await prismaClient.pasien.update({
+        where: {
+            id_pasien: id
+        },
+        data: {
+            nama: inputPasien.nama,
+            nik: inputPasien.nik,
+            alamat: inputPasien.alamat,
+            no_hp: inputPasien.no_hp
+        },
+    });
+
+    return pasien;
+
+
 
 
 };
 
 const deletePasien = async (id) => {
-    try {
-
-        const checkIsDeleted = await prismaClient.pasien.findUnique({
-            where: {
-                id_pasien: id
-            }
-        });
-
-        if (!checkIsDeleted || checkIsDeleted.is_deleted) {
-            throw new ResponseError(404, "data pasien tidak ditemukan");
+    const checkIsDeleted = await prismaClient.pasien.findUnique({
+        where: {
+            id_pasien: id
         }
+    });
 
-        const pasien = await prismaClient.pasien.update({
-            where: {
-                id_pasien: id
-            },
-            data: {
-                is_deleted: true
-            }
-        })
-
-        return pasien
-    } catch (error) {
-        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            throw new ResponseError(404, "data pasien tidak ditemukan");
-        }
-
-        throw error
+    if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+        throw new ResponseError(404, "data pasien tidak ditemukan");
     }
+
+    const pasien = await prismaClient.pasien.update({
+        where: {
+            id_pasien: id
+        },
+        data: {
+            is_deleted: true
+        }
+    })
+
+    return pasien
 }
 
 const getRiwayatPasien = async (id) => {
@@ -236,41 +244,33 @@ const updateRiwayatPasien = async ({ id_pasien, id_kunjungan, imagePath }, reque
 }
 
 const deleteRiwayatPasien = async (id_pasien, id_kunjungan) => {
-    try {
+    const checkIsDeleted = await prismaClient.riwayatKunjungan.count({
+        where: {
+            AND: [
+                {
+                    id_kunjungan: id_kunjungan
+                },
+                {
+                    id_pasien: id_pasien
+                }
+            ]
 
-        const checkIsDeleted = await prismaClient.riwayatKunjungan.count({
-            where: {
-                AND: [
-                    {
-                        id_kunjungan: id_kunjungan
-                    },
-                    {
-                        id_pasien: id_pasien
-                    }
-                ]
-
-            }
-        });
-
-        if (checkIsDeleted === 0) {
-            throw new ResponseError(404, "Riwayat tidak ditemukan");
         }
+    });
 
-        const riwayatKunjungan = await prismaClient.riwayatKunjungan.delete({
-            where: {
-                id_kunjungan: id_kunjungan,
-                id_pasien: id_pasien
-            },
-        })
-
-        return riwayatKunjungan
-    } catch (error) {
-        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            throw new ResponseError(404, "data pasien tidak ditemukan");
-        }
-
-        throw error
+    if (checkIsDeleted === 0) {
+        throw new ResponseError(404, "Riwayat tidak ditemukan");
     }
+
+    const riwayatKunjungan = await prismaClient.riwayatKunjungan.delete({
+        where: {
+            id_kunjungan: id_kunjungan,
+            id_pasien: id_pasien
+        },
+    })
+
+    return riwayatKunjungan
+
 }
 
 
