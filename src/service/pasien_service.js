@@ -246,18 +246,23 @@ const updateRiwayatPasien = async ({ id_pasien, id_kunjungan, imagePath }, reque
         throw new ResponseError(404, "data pasien tidak ditemukan");
     }
 
+    const data = {
+        anamnesa: inputRiwayat.anamnesa,
+        diagnosa: inputRiwayat.diagnosa,
+        terapi: inputRiwayat.terapi,
+        catatan: inputRiwayat.catatan,
+    }
+
+    if (imagePath) {
+        data.image = imagePath
+    }
+
     const riwayatKunjungan = await prismaClient.riwayatKunjungan.update({
         where: {
             id_kunjungan: id_kunjungan,
             id_pasien: id_pasien
         },
-        data: {
-            anamnesa: inputRiwayat.anamnesa,
-            diagnosa: inputRiwayat.diagnosa,
-            terapi: inputRiwayat.terapi,
-            catatan: inputRiwayat.catatan,
-            image: imagePath
-        }
+        data: data
     })
 
     return riwayatKunjungan
