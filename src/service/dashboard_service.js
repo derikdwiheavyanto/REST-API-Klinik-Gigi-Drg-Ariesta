@@ -1,23 +1,33 @@
 import { prismaClient } from "../application/database.js";
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek.js";
+dayjs.extend(isoWeek);
 
 const getDashboard = async () => {
-    const countKunjunganPerWeek = await prismaClient.$queryRaw`
-        SELECT COUNT(*) AS jumlah_kunjungan, 
-        WEEK(created_at) AS week, 
-        YEAR(created_at) AS year
-        FROM riwayat_kunjungans
-        where YEAR(created_at) = YEAR(CURDATE()) 
-        AND WEEK(created_at,1) = WEEK(CURDATE()) 
-        GROUP BY week, year`;
+    const startOfWeek = dayjs().startOf('isoWeek').toDate(); // Senin
+    const endOfWeek = dayjs().endOf('isoWeek').toDate();
 
-    const countKunjunganPerMonth = await prismaClient.$queryRaw`
-        SELECT COUNT(*) AS jumlah_kunjungan,
-        MONTH(created_at) AS month,
-        YEAR(created_at) AS year
-        FROM riwayat_kunjungans
-        where YEAR(created_at) = YEAR(CURDATE())
-        AND MONTH(created_at) = MONTH(CURDATE())
-        GROUP BY month, year`
+    const countKunjunganPerWeek = await prismaClient.riwayatKunjungan.count({
+        where: {
+            created_at: {
+                gte: startOfWeek,
+                lte: endOfWeek,
+            },
+        },
+    });
+
+    const startOfMonth = dayjs().startOf("month").toDate();
+    const endOfMonth = dayjs().endOf("month").toDate();
+
+    const countKunjunganPerMonth = await prismaClient.riwayatKunjungan.count({
+        where: {
+            created_at: {
+                gte: startOfMonth,
+                lte: endOfMonth,
+            },
+        },
+    });
+
 
     const awalTahun = new Date(new Date().getFullYear(), 0, 1);
     const akhirTahun = new Date(new Date().getFullYear() + 1, 0, 1);
@@ -47,7 +57,6 @@ const getDashboard = async () => {
     });
 
 
-    console.log(countKunjunganPerWeek)
 
     topPasien.forEach(pasien => {
         pasien.riwayat_kunjungan = Number(pasien._count.riwayat_kunjungan);
@@ -56,8 +65,8 @@ const getDashboard = async () => {
 
     return {
 
-        KunjunganPerWeek: Number(countKunjunganPerWeek[0]?.jumlah_kunjungan || 0),
-        KunjunganPerMonth: Number(countKunjunganPerMonth[0]?.jumlah_kunjungan || 0),
+        KunjunganPerWeek: countKunjunganPerWeek,
+        KunjunganPerMonth: countKunjunganPerMonth,
         topPasien: topPasien
 
     }
