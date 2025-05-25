@@ -7,7 +7,7 @@ const getDashboard = async () => {
         YEAR(created_at) AS year
         FROM riwayat_kunjungans
         where YEAR(created_at) = YEAR(CURDATE()) 
-        AND WEEK(created_at) = WEEK(CURDATE()) 
+        AND WEEK(created_at,1) = WEEK(CURDATE()) 
         GROUP BY week, year`;
 
     const countKunjunganPerMonth = await prismaClient.$queryRaw`
@@ -46,6 +46,9 @@ const getDashboard = async () => {
         take: 5,
     });
 
+
+    console.log(countKunjunganPerWeek)
+
     topPasien.forEach(pasien => {
         pasien.riwayat_kunjungan = Number(pasien._count.riwayat_kunjungan);
         delete pasien._count;
@@ -53,8 +56,8 @@ const getDashboard = async () => {
 
     return {
 
-        KunjunganPerWeek: Number(countKunjunganPerWeek[0].jumlah_kunjungan),
-        KunjunganPerMonth: Number(countKunjunganPerMonth[0].jumlah_kunjungan),
+        KunjunganPerWeek: Number(countKunjunganPerWeek[0]?.jumlah_kunjungan || 0),
+        KunjunganPerMonth: Number(countKunjunganPerMonth[0]?.jumlah_kunjungan || 0),
         topPasien: topPasien
 
     }
