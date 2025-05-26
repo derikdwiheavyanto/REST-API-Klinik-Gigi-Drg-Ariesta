@@ -4,6 +4,7 @@ import { validate } from "../validation/validation.js";
 import { ResponseError } from "../error/response_erorr.js";
 import { inputRiwayatValidation } from "../validation/riwayat_validation.js";
 
+// get data pasien by pagination desc
 const getPasien = async (searchQuery, skip, limit) => {
     let whereClause = {
         is_deleted: false
@@ -34,7 +35,10 @@ const getPasien = async (searchQuery, skip, limit) => {
     const pasien = await prismaClient.pasien.findMany({
         where: whereClause,
         skip: skip,
-        take: limit
+        take: limit,
+        orderBy: {
+            created_at: 'desc'
+        }
     });
 
     // Hitung total halaman
@@ -46,6 +50,8 @@ const getPasien = async (searchQuery, skip, limit) => {
         totalPage
     };
 };
+
+// get data pasien by id
 const getPasienById = async (id) => {
     const checkIsDeleted = await prismaClient.pasien.findUnique({
         where: {
@@ -74,6 +80,7 @@ const getPasienById = async (id) => {
     return pasien
 }
 
+// create data pasien
 const createPasien = async (request) => {
     const inputPasien = validate(inputPasienValidation, request)
     let pasien;
@@ -111,6 +118,8 @@ const createPasien = async (request) => {
 
     return pasien;
 };
+
+// update data pasien by id
 const updatePasien = async (id, request) => {
     const inputPasien = validate(inputPasienValidation, request)
 
@@ -143,6 +152,8 @@ const updatePasien = async (id, request) => {
 
 };
 
+
+// soft delete data pasien
 const deletePasien = async (id) => {
     const checkIsDeleted = await prismaClient.pasien.findUnique({
         where: {
@@ -166,6 +177,7 @@ const deletePasien = async (id) => {
     return pasien
 }
 
+// get data riwayat pasien by id pasien
 const getRiwayatPasien = async (id) => {
 
     const checkIsDeleted = await prismaClient.pasien.findUnique({
@@ -181,12 +193,16 @@ const getRiwayatPasien = async (id) => {
     const pasien = await prismaClient.riwayatKunjungan.findMany({
         where: {
             id_pasien: id
+        },
+        orderBy: {
+            created_at: 'desc'
         }
     });
 
     return pasien
 }
 
+// get data riwayat pasien by id
 const getRiwayatById = async (id, id_kunjungan) => {
 
     const checkIsDeleted = await prismaClient.pasien.findUnique({
@@ -208,6 +224,7 @@ const getRiwayatById = async (id, id_kunjungan) => {
     return riwayat
 }
 
+// create data riwayat
 const createRiwayat = async (id_pasien, { anamnesa, diagnosa, terapi, catatan, image }) => {
     const pasien = await prismaClient.pasien.findUnique({
         where: {
@@ -233,6 +250,7 @@ const createRiwayat = async (id_pasien, { anamnesa, diagnosa, terapi, catatan, i
     return riwayat;
 };
 
+// update data riwayat
 const updateRiwayatPasien = async ({ id_pasien, id_kunjungan, imagePath }, request) => {
     const inputRiwayat = validate(inputRiwayatValidation, request)
     const checkIsDeleted = await prismaClient.pasien.findUnique({
@@ -268,6 +286,7 @@ const updateRiwayatPasien = async ({ id_pasien, id_kunjungan, imagePath }, reque
     return riwayatKunjungan
 }
 
+// delete data riwayat
 const deleteRiwayatPasien = async (id_pasien, id_kunjungan) => {
     const checkIsDeleted = await prismaClient.riwayatKunjungan.count({
         where: {
