@@ -1,5 +1,3 @@
-
-import { ResponseError } from "../error/response_erorr.js";
 import pasien_service from "../service/pasien_service.js"
 
 
@@ -46,9 +44,6 @@ const createPasien = async (req, res, next) => {
             data: result,
         });
     } catch (error) {
-        if (error.code === "P2002" && error.meta.target.includes("nik")) {
-            throw new ResponseError(400, "NIK sudah terdaftar");
-        }
         next(error);
     }
 };
@@ -64,10 +59,6 @@ const updatePasien = async (req, res, next) => {
             data: result,
         });
     } catch (error) {
-        if (error.code === 'P2025') {
-            throw new ResponseError(404, "data pasien tidak ditemukan");
-
-        }
         next(error);
     }
 };
@@ -81,10 +72,6 @@ const deletePasien = async (req, res, next) => {
             message: "Data pasien berhasil dihapus",
         })
     } catch (error) {
-        if (error.code === 'P2025') {
-            throw new ResponseError(404, "data pasien tidak ditemukan");
-
-        }
         next(error)
     }
 }
@@ -95,7 +82,7 @@ const getRiwayatPasien = async (req, res, next) => {
         const result = await pasien_service.getRiwayatPasien(id)
         const baseUrl = process.env.BASE_URL
         result.forEach(riwayat => {
-            riwayat.image = `${baseUrl}/${riwayat.image}`
+            if (riwayat.image) riwayat.image = `${baseUrl}/${riwayat.image}`
         });
         res.status(200).json({
             message: "Get Data Riwayat Success",
@@ -112,15 +99,12 @@ const getRiwayatById = async (req, res, next) => {
         const id_kunjungan = parseInt(req.params.id_kunjungan)
         const result = await pasien_service.getRiwayatById(id, id_kunjungan)
         const baseUrl = process.env.BASE_URL
-        result.image = `${baseUrl}/${result.image}`
+        if (result.image) result.image = `${baseUrl}/${result.image}`
         res.status(200).json({
             message: "Get Data Riwayat Success",
             data: result
         })
     } catch (error) {
-        if (error.code === 'P2025') {
-            throw new ResponseError(404, "data riwayat tidak ditemukan");
-        }
         next(error)
     }
 }
@@ -128,13 +112,23 @@ const getRiwayatById = async (req, res, next) => {
 const createRiwayat = async (req, res, next) => {
     try {
         const id_pasien = parseInt(req.params.id, 10);
-        const { anamnesa, diagnosa, terapi, catatan, } = req.body;
+        const { anamnesa, diagnosa, terapi, catatan, tanggal_kunjungan } = req.body;
         const imagePath = req.file ? req.file.path : null;
 
         // Validasi input
-        if (!anamnesa || !diagnosa || !terapi) {
+        if (!anamnesa || !diagnosa || !terapi || !tanggal_kunjungan) {
             return res.status(400).json({
                 message: "Anamnesa, diagnosa, dan terapi harus diisi!",
+            });
+        }
+
+        const parseTanggalKunjungan = new Date(tanggal_kunjungan);
+
+
+
+        if (isNaN(parseTanggalKunjungan)) {
+            return res.status(400).json({
+                message: "Tanggal kunjungan tidak valid!",
             });
         }
 
@@ -143,8 +137,11 @@ const createRiwayat = async (req, res, next) => {
             diagnosa,
             terapi,
             catatan,
+            tanggal_kunjungan: parseTanggalKunjungan,
             image: imagePath,
         });
+
+        if (result.image) result.image = `${baseUrl}/${result.image}`
 
         res.status(201).json({
             message: "Riwayat kunjungan berhasil ditambahkan",
@@ -173,10 +170,6 @@ const updateRiwayatPasien = async (req, res, next) => {
             data: result
         })
     } catch (error) {
-        if (error.code === 'P2025') {
-            throw new ResponseError(404, "data riwayat tidak ditemukan");
-
-        }
         next(error)
     }
 }
@@ -191,10 +184,6 @@ const deleteRiwayatPasien = async (req, res, next) => {
             message: "Data kunjungan berhasil dihapus",
         })
     } catch (error) {
-        if (error.code === 'P2025') {
-            throw new ResponseError(404, "data pasien tidak ditemukan");
-
-        }
         next(error)
     }
 }

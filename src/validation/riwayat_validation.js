@@ -15,7 +15,11 @@ const inputRiwayatValidation = Joi.object({
         "string.empty": "Terapi harus diisi",
         "any.required": "Terapi harus diisi",
     }),
-    catatan: Joi.string().allow('').optional()
+    catatan: Joi.string().allow('').optional(),
+    tanggal_kunjungan: Joi.date().required().messages({
+        "string.empty": "Tanggal kunjungan harus diisi",
+        "any.required": "Tanggal kunjungan harus diisi",
+    }),
 })
 
 export { inputRiwayatValidation };

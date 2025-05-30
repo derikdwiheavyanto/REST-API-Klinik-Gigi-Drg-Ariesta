@@ -3,6 +3,8 @@ import { inputPasienValidation } from "../validation/pasien_validation.js"
 import { validate } from "../validation/validation.js";
 import { ResponseError } from "../error/response_erorr.js";
 import { inputRiwayatValidation } from "../validation/riwayat_validation.js";
+import { generateNoPasien } from "../utils/helper/generate_no_pasien.js";
+import { checkDeletedPasien } from "../utils/helper/check_deleted_pasien.js";
 
 // get data pasien by pagination desc
 const getPasien = async (searchQuery, skip, limit) => {
@@ -16,7 +18,7 @@ const getPasien = async (searchQuery, skip, limit) => {
                 {
                     OR: [
                         { nama: { contains: searchQuery, } },
-                        { nik: { contains: searchQuery, } },
+                        { no_pasien: { contains: searchQuery, } },
                     ],
                 },
                 {
@@ -31,9 +33,21 @@ const getPasien = async (searchQuery, skip, limit) => {
         where: whereClause
     });
 
+    const select = {
+        id_pasien: true,
+        no_pasien: true,
+        nama: true,
+        alamat: true,
+        no_hp: true,
+        umur: true,
+        created_at: true,
+        updated_at: true,
+    }
+
     // Ambil data sesuai pagination
     const pasien = await prismaClient.pasien.findMany({
         where: whereClause,
+        select: select,
         skip: skip,
         take: limit,
         orderBy: {
@@ -53,13 +67,9 @@ const getPasien = async (searchQuery, skip, limit) => {
 
 // get data pasien by id
 const getPasienById = async (id) => {
-    const checkIsDeleted = await prismaClient.pasien.findUnique({
-        where: {
-            id_pasien: id
-        }
-    });
+    const checkIsDeleted = await checkDeletedPasien(id)
 
-    if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+    if (checkIsDeleted) {
         throw new ResponseError(404, "data pasien tidak ditemukan");
     }
 
@@ -83,36 +93,17 @@ const getPasienById = async (id) => {
 // create data pasien
 const createPasien = async (request) => {
     const inputPasien = validate(inputPasienValidation, request)
+
     let pasien;
-    const chekcPasienIsExistDeleted = await prismaClient.pasien.findFirst({
-        where: {
-            nik: inputPasien.nik,
-            is_deleted: true
-        }
-    })
-
-    if (chekcPasienIsExistDeleted) {
-        pasien = await prismaClient.pasien.update({
-            where: {
-                nik: inputPasien.nik
-            },
-            data: {
-                nama: inputPasien.nama,
-                alamat: inputPasien.alamat,
-                no_hp: inputPasien.no_hp,
-                is_deleted: false
-            }
-        })
-
-        return pasien
-    }
+    const noPasien = await generateNoPasien();
 
     pasien = await prismaClient.pasien.create({
         data: {
+            no_pasien: noPasien,
             nama: inputPasien.nama,
-            nik: inputPasien.nik,
             alamat: inputPasien.alamat,
-            no_hp: inputPasien.no_hp
+            no_hp: inputPasien.no_hp,
+            umur: inputPasien.umur
         },
     });
 
@@ -123,13 +114,9 @@ const createPasien = async (request) => {
 const updatePasien = async (id, request) => {
     const inputPasien = validate(inputPasienValidation, request)
 
-    const checkIsDeleted = await prismaClient.pasien.findUnique({
-        where: {
-            id_pasien: id
-        }
-    });
+    const checkIsDeleted = await checkDeletedPasien(id)
 
-    if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+    if (checkIsDeleted) {
         throw new ResponseError(404, "data pasien tidak ditemukan");
     }
 
@@ -139,9 +126,9 @@ const updatePasien = async (id, request) => {
         },
         data: {
             nama: inputPasien.nama,
-            nik: inputPasien.nik,
             alamat: inputPasien.alamat,
-            no_hp: inputPasien.no_hp
+            no_hp: inputPasien.no_hp,
+            umur: inputPasien.umur
         },
     });
 
@@ -155,13 +142,9 @@ const updatePasien = async (id, request) => {
 
 // soft delete data pasien
 const deletePasien = async (id) => {
-    const checkIsDeleted = await prismaClient.pasien.findUnique({
-        where: {
-            id_pasien: id
-        }
-    });
+    const checkIsDeleted = await checkDeletedPasien(id)
 
-    if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+    if (checkIsDeleted) {
         throw new ResponseError(404, "data pasien tidak ditemukan");
     }
 
@@ -180,13 +163,9 @@ const deletePasien = async (id) => {
 // get data riwayat pasien by id pasien
 const getRiwayatPasien = async (id) => {
 
-    const checkIsDeleted = await prismaClient.pasien.findUnique({
-        where: {
-            id_pasien: id
-        }
-    });
+    const checkIsDeleted = await checkDeletedPasien(id)
 
-    if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+    if (checkIsDeleted) {
         throw new ResponseError(404, "data pasien tidak ditemukan");
     }
 
@@ -194,9 +173,10 @@ const getRiwayatPasien = async (id) => {
         where: {
             id_pasien: id
         },
-        orderBy: {
-            created_at: 'desc'
-        }
+        orderBy: [
+            { tanggal_kunjungan: 'asc' },
+            { created_at: 'desc' }
+        ]
     });
 
     return pasien
@@ -205,13 +185,9 @@ const getRiwayatPasien = async (id) => {
 // get data riwayat pasien by id
 const getRiwayatById = async (id, id_kunjungan) => {
 
-    const checkIsDeleted = await prismaClient.pasien.findUnique({
-        where: {
-            id_pasien: id
-        }
-    });
+    const checkIsDeleted = await checkDeletedPasien(id)
 
-    if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+    if (checkIsDeleted) {
         throw new ResponseError(404, "data pasien tidak ditemukan");
     }
 
@@ -225,14 +201,10 @@ const getRiwayatById = async (id, id_kunjungan) => {
 }
 
 // create data riwayat
-const createRiwayat = async (id_pasien, { anamnesa, diagnosa, terapi, catatan, image }) => {
-    const pasien = await prismaClient.pasien.findUnique({
-        where: {
-            id_pasien
-        },
-    });
+const createRiwayat = async (id_pasien, { anamnesa, diagnosa, terapi, catatan, image, tanggal_kunjungan }) => {
+    const checkIsDeleted = await checkDeletedPasien(id_pasien)
 
-    if (!pasien || pasien.is_deleted) {
+    if (checkIsDeleted) {
         throw new ResponseError(404, "Pasien tidak ditemukan atau telah dihapus");
     }
 
@@ -243,6 +215,7 @@ const createRiwayat = async (id_pasien, { anamnesa, diagnosa, terapi, catatan, i
             diagnosa: diagnosa,
             terapi: terapi,
             catatan: catatan,
+            tanggal_kunjungan: tanggal_kunjungan,
             image: image,
         },
     });
@@ -260,7 +233,7 @@ const updateRiwayatPasien = async ({ id_pasien, id_kunjungan, imagePath }, reque
         }
     })
 
-    if (!checkIsDeleted || checkIsDeleted.is_deleted) {
+    if (checkIsDeleted) {
         throw new ResponseError(404, "data pasien tidak ditemukan");
     }
 
@@ -269,6 +242,7 @@ const updateRiwayatPasien = async ({ id_pasien, id_kunjungan, imagePath }, reque
         diagnosa: inputRiwayat.diagnosa,
         terapi: inputRiwayat.terapi,
         catatan: inputRiwayat.catatan,
+        tanggal_kunjungan: inputRiwayat.tanggal_kunjungan
     }
 
     if (imagePath) {
