@@ -226,12 +226,7 @@ const createRiwayat = async (id_pasien, { anamnesa, diagnosa, terapi, catatan, i
 // update data riwayat
 const updateRiwayatPasien = async ({ id_pasien, id_kunjungan, imagePath }, request) => {
     const inputRiwayat = validate(inputRiwayatValidation, request)
-    const checkIsDeleted = await prismaClient.pasien.findUnique({
-        where: {
-            id_pasien: id_pasien
-
-        }
-    })
+    const checkIsDeleted = await checkDeletedPasien(id_pasien)
 
     if (checkIsDeleted) {
         throw new ResponseError(404, "data pasien tidak ditemukan");
