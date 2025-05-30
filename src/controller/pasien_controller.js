@@ -114,6 +114,7 @@ const createRiwayat = async (req, res, next) => {
         const id_pasien = parseInt(req.params.id, 10);
         const { anamnesa, diagnosa, terapi, catatan, tanggal_kunjungan } = req.body;
         const imagePath = req.file ? req.file.path : null;
+        const baseUrl = process.env.BASE_URL
 
         // Validasi input
         if (!anamnesa || !diagnosa || !terapi || !tanggal_kunjungan) {
