@@ -1,18 +1,19 @@
 import { prismaClient } from "./application/database.js";
+import { logger } from "./application/logging.js";
 import { web } from "./application/web.js";
 import dotenv from "dotenv";
 
 
 
 dotenv.config()
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 8001;
 web.listen(port, async () => {
-    console.log("Server running on port " + port);
+    logger.info("Server running on port " + port);
     try {
         await prismaClient.$connect()
-        console.log("✅ Koneksi ke database berhasil!")
+        logger.info("✅ Koneksi ke database berhasil!")
     } catch (error) {
-        console.log("❌ Koneksi ke database Gagal!")
+        logger.error("❌ Koneksi ke database Gagal!")
     } finally {
         await prismaClient.$disconnect();
     }

@@ -3,6 +3,7 @@ import { publicRouter } from '../routes/public_api.js';
 import { errorMiddleware } from '../middleware/error_middleware.js';
 import { privateRouter } from '../routes/api.js';
 import cors from 'cors';
+import { morganMiddleware } from '../middleware/morgan_middleware.js';
 
 
 export const web = express();
@@ -11,6 +12,7 @@ web.use(cors())
 
 web.use(express.json());
 web.use(express.urlencoded({ extended: true }));
+web.use(morganMiddleware)
 
 
 web.use("/api/uploads", express.static("uploads"));

@@ -1,3 +1,4 @@
+import { config } from "../config.js";
 import pasien_service from "../service/pasien_service.js"
 
 
@@ -80,7 +81,7 @@ const getRiwayatPasien = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id)
         const result = await pasien_service.getRiwayatPasien(id)
-        const baseUrl = process.env.BASE_URL
+        const baseUrl = config.baseUrl
         result.forEach(riwayat => {
             if (riwayat.image) riwayat.image = `${baseUrl}/${riwayat.image}`
         });
@@ -98,7 +99,7 @@ const getRiwayatById = async (req, res, next) => {
         const id = parseInt(req.params.id)
         const id_kunjungan = parseInt(req.params.id_kunjungan)
         const result = await pasien_service.getRiwayatById(id, id_kunjungan)
-        const baseUrl = process.env.BASE_URL
+        const baseUrl = config.baseUrl
         if (result.image) result.image = `${baseUrl}/${result.image}`
         res.status(200).json({
             message: "Get Data Riwayat Success",
@@ -114,7 +115,7 @@ const createRiwayat = async (req, res, next) => {
         const id_pasien = parseInt(req.params.id, 10);
         const { anamnesa, diagnosa, terapi, catatan, tanggal_kunjungan } = req.body;
         const imagePath = req.file ? req.file.path : null;
-        const baseUrl = process.env.BASE_URL
+        const baseUrl = config.baseUrl
 
         // Validasi input
         if (!anamnesa || !diagnosa || !terapi || !tanggal_kunjungan) {
