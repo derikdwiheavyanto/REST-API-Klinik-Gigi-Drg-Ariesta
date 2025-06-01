@@ -1,5 +1,6 @@
 import { config } from "../config.js";
 import pasien_service from "../service/pasien_service.js"
+import { generateExcel } from "../utils/helper/generate_excel.js";
 
 
 const getPasienSearch = async (req, res, next) => {
@@ -190,6 +191,20 @@ const deleteRiwayatPasien = async (req, res, next) => {
     }
 }
 
+const exportPasien = async (req, res, next) => {
+    try {
+        const pasienWithRiwayat = await pasien_service.getPasienWithRiwayat()
+        const workbook = await generateExcel({ pasienWithRiwayat })
+        res.setHeader('Content-Disposition', 'attachment; filename=data_pasien.xlsx');
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        await workbook.xlsx.write(res);
+        res.end();
+
+    } catch (error) {
+        next(error)
+    }
+}
+
 export default {
     getPasienSearch,
     getPasienById,
@@ -201,4 +216,5 @@ export default {
     createRiwayat,
     updateRiwayatPasien,
     deleteRiwayatPasien,
+    exportPasien
 }

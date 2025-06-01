@@ -27,3 +27,6 @@ privateRouter.post("/pasien/:id/kunjungan", authMiddleware, upload.single("image
 privateRouter.patch("/pasien/:id/kunjungan/:id_kunjungan", authMiddleware, upload.single("image"), pasien_controller.updateRiwayatPasien);
 privateRouter.delete("/pasien/:id/kunjungan/:id_kunjungan", authMiddleware, pasien_controller.deleteRiwayatPasien)
 // privateRouter.delete("/logout", auth_controller.logout)
+
+// export data pasien
+privateRouter.get("/export", authMiddleware, pasien_controller.exportPasien)

@@ -287,6 +287,25 @@ const deleteRiwayatPasien = async (id_pasien, id_kunjungan) => {
 }
 
 
+const getPasienWithRiwayat = async () => {
+
+    const pasienWithRiwayat = await prismaClient.pasien.findMany({
+        where: {
+            is_deleted: false
+        },
+        include: {
+            riwayat_kunjungan: {
+                orderBy: [
+                    { tanggal_kunjungan: 'asc' },
+                    { created_at: 'desc' }
+                ],
+            }
+        }
+    })
+
+    return pasienWithRiwayat
+}
+
 export default {
     createPasien,
     getPasien,
@@ -298,4 +317,5 @@ export default {
     getRiwayatById,
     updateRiwayatPasien,
     deleteRiwayatPasien,
+    getPasienWithRiwayat
 }
