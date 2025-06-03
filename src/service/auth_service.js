@@ -8,7 +8,11 @@ import { config } from "../config.js";
 import redis from "redis";
 
 // 🔌 Setup Redis
-const redisClient = redis.createClient();
+const redisClient = redis.createClient(
+    {
+        url: config.redisUrl
+    }
+);
 redisClient.on('error', (err) => {
     console.error('❌ Redis Client Error:', err);
 });
