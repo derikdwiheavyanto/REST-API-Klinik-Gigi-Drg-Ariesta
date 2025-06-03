@@ -23,10 +23,11 @@ model User {
 
 model Pasien {
   id_pasien         Int                @id @default(autoincrement())
-  nik               String             @unique @db.VarChar(16)
+  no_pasien         String             @unique @db.VarChar(14)
   nama              String             @db.VarChar(100)
   alamat            String?            @db.VarChar(200)
   no_hp             String?            @db.VarChar(20)
+  umur              Int?
   is_deleted        Boolean            @default(false)
   created_at        DateTime           @default(now())
   updated_at        DateTime           @updatedAt
@@ -36,15 +37,16 @@ model Pasien {
 }
 
 model RiwayatKunjungan {
-  id_kunjungan Int      @id @default(autoincrement())
-  anamnesa     String
-  diagnosa     String
-  terapi       String
-  catatan      String
-  image        String
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
-  id_pasien    Int
+  id_kunjungan      Int      @id @default(autoincrement())
+  anamnesa          String
+  diagnosa          String
+  terapi            String
+  catatan           String?
+  image             String?
+  tanggal_kunjungan DateTime
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  id_pasien         Int
 
   pasien Pasien @relation(fields: [id_pasien], references: [id_pasien])
 

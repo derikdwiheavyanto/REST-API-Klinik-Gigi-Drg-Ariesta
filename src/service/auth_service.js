@@ -4,6 +4,7 @@ import { loginUserValidation } from "../validation/login_validation.js"
 import { validate } from "../validation/validation.js"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
+import { config } from "../config.js"
 
 
 const login = async (request) => {
@@ -30,7 +31,7 @@ const login = async (request) => {
         throw new ResponseError(401, "username or password wrong");
     }
 
-    const token = jwt.sign({ username: user.username }, process.env.SECRET_KEY_JWT, { expiresIn: '1h' })
+    const token = jwt.sign({ username: user.username }, config.secretKeyJwt, { expiresIn: '1h' })
 
     return {
         username: user.username,

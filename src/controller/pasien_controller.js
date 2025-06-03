@@ -1,16 +1,22 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client"
-import { ResponseError } from "../error/response_erorr.js"
+import { config } from "../config.js";
 import pasien_service from "../service/pasien_service.js"
+import { generateExcel } from "../utils/helper/generate_excel.js";
 
 
 const getPasienSearch = async (req, res, next) => {
     try {
         const searchQuery = req.query.search || ''
-        const result = await pasien_service.getPasien(searchQuery)
+        const page = parseInt(req.query.page) || 1;       // halaman ke-berapa
+        const limit = parseInt(req.query.limit) || 10;    // berapa data per halaman
+        const skip = (page - 1) * limit;
+
+        const result = await pasien_service.getPasien(searchQuery, skip, limit)
 
         res.status(200).json({
             message: "Get Data Pasien Success",
-            data: result
+            data: result.data,
+            total_data: result.totalData,
+            total_page: result.totalPage
         })
     } catch (error) {
         next(error)
@@ -55,7 +61,6 @@ const updatePasien = async (req, res, next) => {
             data: result,
         });
     } catch (error) {
-
         next(error);
     }
 };
@@ -77,7 +82,26 @@ const getRiwayatPasien = async (req, res, next) => {
     try {
         const id = parseInt(req.params.id)
         const result = await pasien_service.getRiwayatPasien(id)
+        const baseUrl = config.baseUrl
+        result.forEach(riwayat => {
+            if (riwayat.image) riwayat.image = `${baseUrl}/${riwayat.image}`
+        });
+        res.status(200).json({
+            message: "Get Data Riwayat Success",
+            data: result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
 
+const getRiwayatById = async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id)
+        const id_kunjungan = parseInt(req.params.id_kunjungan)
+        const result = await pasien_service.getRiwayatById(id, id_kunjungan)
+        const baseUrl = config.baseUrl
+        if (result.image) result.image = `${baseUrl}/${result.image}`
         res.status(200).json({
             message: "Get Data Riwayat Success",
             data: result
@@ -90,13 +114,24 @@ const getRiwayatPasien = async (req, res, next) => {
 const createRiwayat = async (req, res, next) => {
     try {
         const id_pasien = parseInt(req.params.id, 10);
-        const { anamnesa, diagnosa, terapi, catatan, } = req.body;
+        const { anamnesa, diagnosa, terapi, catatan, tanggal_kunjungan } = req.body;
         const imagePath = req.file ? req.file.path : null;
+        const baseUrl = config.baseUrl
 
         // Validasi input
-        if (!anamnesa || !diagnosa || !terapi) {
+        if (!anamnesa || !diagnosa || !terapi || !tanggal_kunjungan) {
             return res.status(400).json({
                 message: "Anamnesa, diagnosa, dan terapi harus diisi!",
+            });
+        }
+
+        const parseTanggalKunjungan = new Date(tanggal_kunjungan);
+
+
+
+        if (isNaN(parseTanggalKunjungan)) {
+            return res.status(400).json({
+                message: "Tanggal kunjungan tidak valid!",
             });
         }
 
@@ -105,8 +140,11 @@ const createRiwayat = async (req, res, next) => {
             diagnosa,
             terapi,
             catatan,
+            tanggal_kunjungan: parseTanggalKunjungan,
             image: imagePath,
         });
+
+        if (result.image) result.image = `${baseUrl}/${result.image}`
 
         res.status(201).json({
             message: "Riwayat kunjungan berhasil ditambahkan",
@@ -117,13 +155,66 @@ const createRiwayat = async (req, res, next) => {
     }
 };
 
+const updateRiwayatPasien = async (req, res, next) => {
+    try {
+        const id_pasien = parseInt(req.params.id)
+        const id_kunjungan = parseInt(req.params.id_kunjungan)
+        const request = req.body
+        const imagePath = req.file ? req.file.path : null
+
+        const result = await pasien_service.updateRiwayatPasien({
+            id_pasien,
+            id_kunjungan,
+            imagePath
+        }, request)
+
+        res.status(200).json({
+            message: "Riwayat kunjungan berhasil diupdate",
+            data: result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const deleteRiwayatPasien = async (req, res, next) => {
+    try {
+        const id_pasien = parseInt(req.params.id)
+        const id_kunjungan = parseInt(req.params.id_kunjungan)
+        await pasien_service.deleteRiwayatPasien(id_pasien, id_kunjungan)
+
+        res.status(200).json({
+            message: "Data kunjungan berhasil dihapus",
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const exportPasien = async (req, res, next) => {
+    try {
+        const pasienWithRiwayat = await pasien_service.getPasienWithRiwayat()
+        const workbook = await generateExcel({ pasienWithRiwayat })
+        res.setHeader('Content-Disposition', 'attachment; filename=data_pasien.xlsx');
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        await workbook.xlsx.write(res);
+        res.end();
+
+    } catch (error) {
+        next(error)
+    }
+}
+
 export default {
     getPasienSearch,
     getPasienById,
     createPasien,
     updatePasien,
     deletePasien,
-
     getRiwayatPasien,
-    createRiwayat
+    getRiwayatById,
+    createRiwayat,
+    updateRiwayatPasien,
+    deleteRiwayatPasien,
+    exportPasien
 }
