@@ -26,6 +26,7 @@ privateRouter.get("/pasien/:id/kunjungan/:id_kunjungan", authMiddleware, pasien_
 privateRouter.post("/pasien/:id/kunjungan", authMiddleware, upload.single("image"), pasien_controller.createRiwayat);
 privateRouter.patch("/pasien/:id/kunjungan/:id_kunjungan", authMiddleware, upload.single("image"), pasien_controller.updateRiwayatPasien);
 privateRouter.delete("/pasien/:id/kunjungan/:id_kunjungan", authMiddleware, pasien_controller.deleteRiwayatPasien)
+privateRouter.post("/logout", authMiddleware, auth_controller.logout)
 // privateRouter.delete("/logout", auth_controller.logout)
 
 // export data pasien
