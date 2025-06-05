@@ -28,28 +28,29 @@ const login = async (request) => {
     const isPasswordMatch = await bcrypt.compare(loginRequest.password, user.password);
     if (!isPasswordMatch) throw new ResponseError(401, "username or password wrong");
 
-    const accessToken = generateAccessToken(user.username);
-    return { username: user.username, token: accessToken };
+
+    return { username: user.username };
 };
 
-const generateAccessToken = (username) => {
-    return jwt.sign({ username }, config.secretKeyJwt, { expiresIn: '15m' });
+const generateAccessToken = (tokenId) => {
+    return jwt.sign({ tokenId }, config.secretKeyJwt, { expiresIn: '15m' });
 };
 
-const generateRefreshToken = (username) => {
-    return jwt.sign({ username }, config.secretRefreshKeyJwt, { expiresIn: '7d' });
+const generateRefreshToken = ( tokenId ) => {
+    return jwt.sign({ tokenId }, config.secretRefreshKeyJwt, { expiresIn: '7d' });
 };
 
-const saveRefreshToken = async (token, username) => {
-    await redisClient.set(username, token, { EX: 7 * 24 * 3600 }); // TTL 7 hari
+const saveRefreshToken = async (token, tokenId ) => {
+    await redisClient.set(tokenId, token, { EX: 7 * 24 * 3600 }); // TTL 7 hari
 };
 
-const getStoredRefreshToken = async (username) => {
-    return await redisClient.get(username);
+const getStoredRefreshToken = async ( tokenId ) => {
+    return await redisClient.get(tokenId);
 };
 
-const removeRefreshToken = async (username) => {
-    await redisClient.del(username);
+
+const removeRefreshToken = async ( tokenId ) => {
+    await redisClient.del(tokenId);
 };
 
 const verifyAccessToken = (token) => {

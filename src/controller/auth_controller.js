@@ -1,12 +1,17 @@
 import { logger } from "../application/logging.js";
 import { ResponseError } from "../error/response_erorr.js";
 import authService from "../service/auth_service.js";
+import { v4 as uuidv4 } from 'uuid';
 
 const login = async (req, res, next) => {
     try {
         const data = await authService.login(req.body);
-        const refreshToken = authService.generateRefreshToken(data.username);
-        await authService.saveRefreshToken(refreshToken, data.username);
+
+
+        const tokenId = `${data.username}:${uuidv4()}`;
+        const accessToken = authService.generateAccessToken(tokenId);
+        const refreshToken = authService.generateRefreshToken(tokenId);
+        await authService.saveRefreshToken(refreshToken, tokenId);
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -16,7 +21,10 @@ const login = async (req, res, next) => {
         });
 
         res.status(200).json({
-            data: data
+            data: {
+                username: data.username,
+                token: accessToken
+            }
         });
     } catch (error) {
         next(error);
@@ -31,7 +39,7 @@ const refreshToken = async (req, res, next) => {
         }
 
         const payload = authService.verifyRefreshToken(refreshToken);
-        const storedToken = await authService.getStoredRefreshToken(payload.username);
+        const storedToken = await authService.getStoredRefreshToken(payload.tokenId);
 
         logger.info(`refreshToken: ${refreshToken}`,);
         logger.info(`storedToken ${storedToken}`);
@@ -39,10 +47,9 @@ const refreshToken = async (req, res, next) => {
             throw new ResponseError(403, 'Invalid refresh token');
         }
 
-        const accessToken = authService.generateAccessToken(payload.username);
+        const accessToken = authService.generateAccessToken(payload.tokenId);
         res.status(200).json({
             data: {
-                username: payload.username,
                 token: accessToken
             }
         });
@@ -58,7 +65,7 @@ const logout = async (req, res, next) => {
         if (!refreshToken) throw new ResponseError(400, 'Refresh token not found');
 
         const payload = authService.verifyRefreshToken(refreshToken);
-        await authService.removeRefreshToken(payload.username);
+        await authService.removeRefreshToken(payload.tokenId);
 
         res.clearCookie('refreshToken', {
             httpOnly: true,
