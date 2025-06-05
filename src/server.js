@@ -1,4 +1,4 @@
-import { prismaClient } from "./application/database.js";
+import { prismaClient, redisClient } from "./application/database.js";
 import { logger } from "./application/logging.js";
 import { web } from "./application/web.js";
 import dotenv from "dotenv";
@@ -10,6 +10,7 @@ const port = process.env.PORT || 8001;
 web.listen(port, async () => {
     logger.info("Server running on port " + port);
     try {
+        await redisClient.connect();
         await prismaClient.$connect()
         logger.info("✅ Koneksi ke database berhasil!")
     } catch (error) {
