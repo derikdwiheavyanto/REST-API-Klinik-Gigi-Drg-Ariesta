@@ -5,19 +5,8 @@ import { validate } from "../validation/validation.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { config } from "../config.js";
-import redis from "redis";
+import { redisClient } from "../application/database.js";
 
-// 🔌 Setup Redis
-const redisClient = redis.createClient(
-    {
-        url: config.redisUrl
-    }
-);
-redisClient.on('error', (err) => {
-    console.error('❌ Redis Client Error:', err);
-});
-
-await redisClient.connect();
 
 const login = async (request) => {
     const loginRequest = validate(loginUserValidation, request);
@@ -40,20 +29,20 @@ const generateAccessToken = (tokenId) => {
     return jwt.sign({ tokenId }, config.secretKeyJwt, { expiresIn: '15m' });
 };
 
-const generateRefreshToken = ( tokenId ) => {
+const generateRefreshToken = (tokenId) => {
     return jwt.sign({ tokenId }, config.secretRefreshKeyJwt, { expiresIn: '7d' });
 };
 
-const saveRefreshToken = async (token, tokenId ) => {
+const saveRefreshToken = async (token, tokenId) => {
     await redisClient.set(tokenId, token, { EX: 7 * 24 * 3600 }); // TTL 7 hari
 };
 
-const getStoredRefreshToken = async ( tokenId ) => {
+const getStoredRefreshToken = async (tokenId) => {
     return await redisClient.get(tokenId);
 };
 
 
-const removeRefreshToken = async ( tokenId ) => {
+const removeRefreshToken = async (tokenId) => {
     await redisClient.del(tokenId);
 };
 
