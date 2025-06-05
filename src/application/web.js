@@ -5,12 +5,13 @@ import { privateRouter } from '../routes/api.js';
 import cors from 'cors';
 import { morganMiddleware } from '../middleware/morgan_middleware.js';
 import cookieParser from 'cookie-parser';
+import { config } from '../config.js';
 
 
 export const web = express();
 
 web.use(cors({
-    origin: "http://localhost:3000",
+    origin: config.originCorsUrl,
     credentials: true,
 }))
 web.use(cookieParser())
