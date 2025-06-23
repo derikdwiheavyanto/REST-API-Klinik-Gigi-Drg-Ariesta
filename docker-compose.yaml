@@ -3,7 +3,7 @@ version: "3.9"
 services:
   klinik_gigi:
     build: ./docker
-    restart: unless-stoped
+    restart: unless-stopped
     env_file:
       - .env
     ports:
@@ -14,7 +14,7 @@ services:
 
   mysql_db:
     image: mysql:lts
-    restart: unless-stoped
+    restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -27,13 +27,13 @@ services:
 
   redis_db:
     image: redis:latest
-    restart: unless-stoped
+    restart: unless-stopped
     ports:
       - 6379:6379
 
   nginx:
     image: nginx:alpine
-    restart: unless-stoped
+    restart: unless-stopped
     ports:
       - 80:80
     volumes:
