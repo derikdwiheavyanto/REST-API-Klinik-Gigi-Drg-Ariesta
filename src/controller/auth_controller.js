@@ -69,7 +69,7 @@ const logout = async (req, res, next) => {
 
         res.clearCookie('refreshToken', {
             httpOnly: true,
-            secure: true,
+            secure: false, // ubah ke true jika menggunakan HTTPS
             sameSite: 'none',
         });
 
