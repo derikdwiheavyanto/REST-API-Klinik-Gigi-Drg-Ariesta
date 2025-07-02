@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { logger } from './logging.js';
+import redis from 'redis';
+import { config } from '../config.js';
 
 
 export const prismaClient = new PrismaClient({
@@ -34,6 +36,31 @@ prismaClient.$on('warn', (e) => {
 prismaClient.$on('info', (e) => {
   logger.info(e.message);
 })
-// prismaClient.$on('query', (e) => {
-//   logger.debug(e.params);
-// })
+
+
+
+export const redisClient = redis.createClient(
+  {
+    url: config.redisUrl
+  }
+);
+
+
+redisClient.on('error', async (err) => {
+  logger.error('❌ Redis Client Error:', err);
+  redisClient.destroy();
+});
+
+redisClient.on('end', () => {
+  logger.error('❌ Redis Client Disconnected');
+});
+
+redisClient.on('connect', () => {
+  logger.info('✅ Redis Client Connected');
+});
+
+
+
+
+
+
