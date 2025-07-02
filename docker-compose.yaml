@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   klinik_gigi:
+    container_name: klinik_gigi
     build: ./docker
     restart: unless-stopped
     env_file:
@@ -13,6 +14,7 @@ services:
       - redis_db
 
   mysql_db:
+    container_name: mysql_db
     image: mysql:lts
     restart: unless-stopped
     env_file:
@@ -28,12 +30,14 @@ services:
       - mysql_data:/var/lib/mysql
 
   redis_db:
+    container_name: redis_db
     image: redis:latest
     restart: unless-stopped
     ports:
       - 6379:6379
 
   phpmyadmin:
+    container_name: phpmyadmin
     image: phpmyadmin/phpmyadmin
     restart: unless-stopped
     ports:
@@ -48,6 +52,7 @@ services:
       - mysql_db
 
   nginx:
+    container_name: nginx
     image: nginx:alpine
     restart: unless-stopped
     ports:
@@ -57,3 +62,7 @@ services:
 
 volumes:
   mysql_data:
+
+networks:
+  klinik-gigi-network:
+    external: true
