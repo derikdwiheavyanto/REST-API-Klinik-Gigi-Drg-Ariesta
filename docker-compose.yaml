@@ -31,6 +31,20 @@ services:
     ports:
       - 6379:6379
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    env_file:
+      - .env
+    environment:
+      - PMA_HOST=mysql_db
+      - PMA_USER=${MYSQL_USER}
+      - PMA_PASSWORD=${MYSQL_PASSWORD}
+    depends_on:
+      - mysql_db
+
   nginx:
     image: nginx:alpine
     restart: unless-stopped
@@ -41,5 +55,3 @@ services:
 
 volumes:
   mysql_data:
-
-
